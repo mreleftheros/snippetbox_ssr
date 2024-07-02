@@ -1,0 +1,1 @@
+const titleElement = document.getElementById("title").children[0].textContent = "SnippetBox!";
