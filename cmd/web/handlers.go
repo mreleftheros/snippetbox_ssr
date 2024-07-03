@@ -2,13 +2,12 @@ package main
 
 import (
 	"fmt"
-	// "html/template"
 	"net/http"
 	"strconv"
 	"strings"
 )
 
-func (app *application) home(w http.ResponseWriter, r *http.Request) {
+func (app *application) indexGet(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		app.notFound(w)
 		return
@@ -20,30 +19,14 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, snippet := range snippets {
-		fmt.Fprintf(w, "%+v\n", snippet)
-	}
+	data := app.newTemplateData(r)
+	data.Snippets = snippets
 
-	// files := []string{
-	// "./ui/html/base.tmpl",
-	// "./ui/html/partials/nav.tmpl",
-	// "./ui/html/pages/home.tmpl",
-	// }
-
-	// tmpl, err := template.ParseFiles(files...)
-	// if err != nil {
-	// app.serverError(w, err)
-	// return
-	// }
-
-	// if err = tmpl.ExecuteTemplate(w, "base", nil); err != nil {
-	// app.serverError(w, err)
-	// return
-	// }
+	app.render(w, "home.tmpl", data, 200)
 }
 
-func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+func (app *application) snippetsIdParamGet(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || id < 0 {
 		app.notFound(w)
 		return
@@ -59,20 +42,31 @@ func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Fprintf(w, "Viewing %+v snippet", snippet)
+	data := app.newTemplateData(r)
+	data.Snippet = snippet
+
+	app.render(w, "view.tmpl", data, 200)
 }
 
-func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		w.Header().Set("Allow", http.MethodPost)
-		app.clientError(w, http.StatusMethodNotAllowed)
+func (app *application) snippetsNewGet(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+
+	app.render(w, "create.tmpl", data, 200)
+}
+
+func (app *application) snippetsNewPost(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.serverError(w, err)
 		return
 	}
-
-	// dummy data
-	title := "test title"
-	content := "test content"
-	expires := 1
+	f := r.PostForm
+	title := f.Get("title")
+	content := f.Get("content")
+	expires, err := strconv.Atoi(f.Get("expires"))
+	if err != nil || expires < 0 {
+		app.clientError(w, 400)
+	}
 
 	id, err := app.snippets.Insert(title, content, expires)
 	if err != nil {
@@ -80,5 +74,5 @@ func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/snippet/view?id=%d", id), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 }

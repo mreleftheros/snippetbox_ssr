@@ -1,6 +1,17 @@
-{{define "title"}}Home{{end}}
+{{define "title"}}Home{{ end }}
 
 {{define "main"}}
-  <h2>Latest snippets</h2>
-  <p>There's nothing to see here yet!</p>
-{{end}}
+{{if .Snippets}}
+<p>Total: {{ len .Snippets }}</p>
+{{ range.Snippets }}
+<p>
+  <a href="/snippets/{{.Id}}"
+    >{{.Title}} - <time>{{humanDate .Created}}</time></a
+  >
+</p>
+
+{{ end }}
+{{else}}
+<p>There are no snippets</p>
+{{ end }}
+{{ end }}

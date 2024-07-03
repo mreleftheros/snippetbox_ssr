@@ -1,0 +1,8 @@
+{{define "title"}}Snippet {{.Snippet.Id}}{{ end }}
+
+{{define "main"}}
+<h1>Snippet no {{.Snippet.Id}} - {{.Snippet.Title}}</h1>
+<p>{{.Snippet.Content}}</p>
+<p>{{.Snippet.Created | humanDate | printf "Created %s"}}</p>
+<p>Expires: {{humanDate .Snippet.Expires}}</p>
+{{ end }}
