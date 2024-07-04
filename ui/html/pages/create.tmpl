@@ -2,7 +2,7 @@
 
 {{define "main"}}
 <h1>New Snippet</h1>
-<form action="/snippet/create" method="POST" autocomplete="off">
+<form action="/snippets/new" method="POST" autocomplete="off">
   <div>
     <label for="title">Title:</label>
     <input
@@ -10,8 +10,14 @@
       name="title"
       id="title"
       placeholder="Enter title"
+      {{if
+      .SnippetForm}}value="{{.SnippetForm.Title}}"
+      {{end}}
       required
     />
+    <p class="error">
+      {{if .SnippetErrors}}{{.SnippetErrors.titleError}}{{ end }}
+    </p>
   </div>
   <div>
     <label for="content">Content:</label>
@@ -20,12 +26,29 @@
       name="content"
       id="content"
       placeholder="Enter content"
+      {{if
+      .SnippetForm}}value="{{.SnippetForm.Content}}"
+      {{end}}
       required
     />
+    <p class="error">
+      {{if .SnippetErrors}}{{.SnippetErrors.contentError}}{{ end }}
+    </p>
   </div>
   <div>
     <label for="expires">Expires in:</label>
-    <input type="number" name="expires" id="expires" required />
+    <input
+      type="number"
+      name="expires"
+      id="expires"
+      {{if
+      .SnippetForm}}value="{{.SnippetForm.Expires}}"
+      {{end}}
+      required
+    />
+    <p class="error">
+      {{if .SnippetErrors}}{{.SnippetErrors.expiresError}}{{ end }}
+    </p>
   </div>
   <input type="submit" value="Create Snippet" />
 </form>

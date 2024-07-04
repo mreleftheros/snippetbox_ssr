@@ -57,22 +57,34 @@ func (app *application) snippetsNewGet(w http.ResponseWriter, r *http.Request) {
 func (app *application) snippetsNewPost(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		app.serverError(w, err)
+		app.clientError(w, 400)
 		return
 	}
-	f := r.PostForm
-	title := f.Get("title")
-	content := f.Get("content")
-	expires, err := strconv.Atoi(f.Get("expires"))
-	if err != nil || expires < 0 {
+
+	title := r.PostForm.Get("title")
+	content := r.PostForm.Get("content")
+	expires, err := strconv.Atoi(r.PostForm.Get("expires"))
+	if err != nil {
 		app.clientError(w, 400)
 	}
 
-	id, err := app.snippets.Insert(title, content, expires)
+	form := app.snippets.NewSnippetForm(title, content, expires)
+
+	if snippetErrors, ok := app.snippets.Validate(form); !ok {
+		data := app.newTemplateData(r)
+		data.SnippetForm = form
+		data.SnippetErrors = snippetErrors
+
+		app.render(w, "create.tmpl", data, http.StatusUnprocessableEntity)
+		return
+	}
+
+	id, err := app.snippets.Insert(form)
 	if err != nil {
 		app.serverError(w, err)
 		return
 	}
 
-	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/snippets/%d", id), http.StatusSeeOther)
+	return
 }

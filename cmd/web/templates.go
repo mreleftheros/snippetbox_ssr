@@ -1,17 +1,19 @@
 package main
 
 import (
+	"github.com/mreleftheros/snippetbox_ssr/internal/models"
 	"html/template"
+	"net/http"
 	"path/filepath"
 	"time"
-
-	"github.com/mreleftheros/snippetbox_ssr/internal/models"
 )
 
 type templateData struct {
-	Snippet     *models.Snippet
-	Snippets    []*models.Snippet
-	CurrentYear int
+	Snippet       *models.Snippet
+	Snippets      []*models.Snippet
+	CurrentYear   int
+	SnippetForm   *models.SnippetForm
+	SnippetErrors *map[string]string
 }
 
 func humanDate(t time.Time) string {
@@ -20,6 +22,12 @@ func humanDate(t time.Time) string {
 
 var functions = template.FuncMap{
 	"humanDate": humanDate,
+}
+
+func (app *application) newTemplateData(r *http.Request) *templateData {
+	return &templateData{
+		CurrentYear: time.Now().Year(),
+	}
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {
