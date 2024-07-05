@@ -7,3 +7,7 @@ body {
 .error {
   color: crimson;
 }
+
+.success {
+  color: limegreen;
+}

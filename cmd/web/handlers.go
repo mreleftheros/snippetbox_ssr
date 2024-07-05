@@ -75,7 +75,7 @@ func (app *application) snippetsNewPost(w http.ResponseWriter, r *http.Request) 
 		data.SnippetForm = form
 		data.SnippetErrors = snippetErrors
 
-		app.render(w, "create.tmpl", data, http.StatusUnprocessableEntity)
+		app.render(w, "create.tmpl", data, 422)
 		return
 	}
 
@@ -84,6 +84,8 @@ func (app *application) snippetsNewPost(w http.ResponseWriter, r *http.Request) 
 		app.serverError(w, err)
 		return
 	}
+
+	app.sessionManager.Put(r.Context(), "flash", "Snippet created successfully")
 
 	http.Redirect(w, r, fmt.Sprintf("/snippets/%d", id), http.StatusSeeOther)
 	return

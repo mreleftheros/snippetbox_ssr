@@ -37,3 +37,11 @@ func (app *application) recoverPanic(next http.Handler) http.Handler {
 		next.ServeHTTP(w, r)
 	})
 }
+
+func (app *application) session(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		app.sessionManager.LoadAndSave(next)
+
+		next.ServeHTTP(w, r)
+	})
+}
