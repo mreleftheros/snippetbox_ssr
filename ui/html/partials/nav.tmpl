@@ -1,6 +1,15 @@
 {{define "nav"}}
 <nav>
   <a href="/">Home</a>
-  <a href="/snippets/new">New</a>
+  {{if .User}}
+    <h2>Welcome, {{.User.Name}}!</h2>
+    <a href="/snippets/new">New</a>
+    <form action="/users/logout">
+      <button>Logout</button>
+    </form>
+  {{else}}
+    <a href="/users/signup">Signup</a>
+    <a href="/users/login">Login</a>
+  {{end}}
 </nav>
 {{ end }}

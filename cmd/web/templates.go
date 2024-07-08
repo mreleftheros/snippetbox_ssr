@@ -9,12 +9,14 @@ import (
 )
 
 type templateData struct {
-	Snippet       *models.Snippet
-	Snippets      []*models.Snippet
-	CurrentYear   int
-	SnippetForm   *models.SnippetForm
-	SnippetErrors *map[string]string
-	Flash         string
+	Snippet        *models.Snippet
+	Snippets       []*models.Snippet
+	CurrentYear    int
+	SnippetForm    *models.SnippetForm
+	Errors         *map[string]string
+	UserSignupForm *models.UserSignupForm
+	Flash          string
+	User           *models.User
 }
 
 func humanDate(t time.Time) string {
@@ -26,10 +28,17 @@ var functions = template.FuncMap{
 }
 
 func (app *application) newTemplateData(r *http.Request) *templateData {
-	return &templateData{
+	tD := templateData{
 		CurrentYear: time.Now().Year(),
 		Flash:       app.sessionManager.PopString(r.Context(), "flash"),
 	}
+
+	user, ok := r.Context().Value("user").(*models.User)
+	if ok {
+		tD.User = user
+	}
+
+	return &tD
 }
 
 func newTemplateCache() (map[string]*template.Template, error) {

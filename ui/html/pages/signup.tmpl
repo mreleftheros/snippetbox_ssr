@@ -1,0 +1,55 @@
+{{define "title"}}Signup{{end}}
+
+{{define "main"}}
+<form action="/users/signup" method="POST" autocomplete="off">
+  <div>
+    <label for="name">Name:</label>
+    <input
+      type="text"
+      name="name"
+      id="name"
+      placeholder="Enter name"
+      {{if
+      .UserSignupForm}}value="{{.UserSignupForm.Name}}"
+      {{end}}
+      required
+    />
+    <p class="error">
+      {{if .Errors}}{{.Errors.nameError}}{{ end }}
+    </p>
+  </div>
+  <div>
+    <label for="email">Email:</label>
+    <input
+      type="email"
+      name="email"
+      id="email"
+      placeholder="Enter email"
+      {{if
+      .UserSignupForm}}value="{{.UserSignupForm.Email}}"
+      {{end}}
+      required
+    />
+    <p class="error">
+      {{if .Errors}}{{.Errors.emailError}}{{ end }}
+    </p>
+  </div>
+  <div>
+    <label for="password">Password:</label>
+    <input
+      type="password"
+      name="password"
+      id="password"
+      placeholder="Enter password"
+      required
+    />
+    <p class="error">
+      {{if .Errors}}{{.Errors.passwordError}}{{ end }}
+    </p>
+  </div>
+  <p class="error">
+    {{if .Errors}}{{.Errors.error}}{{ end }}
+  </p>
+  <button>Signup</button>
+</form>
+{{end}}

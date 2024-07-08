@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 )
@@ -41,6 +42,34 @@ func (app *application) recoverPanic(next http.Handler) http.Handler {
 func (app *application) session(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		app.sessionManager.LoadAndSave(next)
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) user(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// if !app.isAuth(r) {
+		// 	http.Redirect(w, r, "/users/login", 303)
+		// }
+
+		// w.Header().Add("Cache-Control", "no-store")
+
+		// next.ServeHTTP(w, r)
+		id := app.sessionManager.GetInt(r.Context(), "userId")
+		if id == 0 {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		user, err := app.users.GetById(id)
+		if err != nil {
+			app.serverError(w, err)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), "user", user)
+		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)
 	})

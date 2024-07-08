@@ -73,7 +73,7 @@ func (app *application) snippetsNewPost(w http.ResponseWriter, r *http.Request) 
 	if snippetErrors, ok := app.snippets.Validate(form); !ok {
 		data := app.newTemplateData(r)
 		data.SnippetForm = form
-		data.SnippetErrors = snippetErrors
+		data.Errors = snippetErrors
 
 		app.render(w, "create.tmpl", data, 422)
 		return
@@ -89,4 +89,92 @@ func (app *application) snippetsNewPost(w http.ResponseWriter, r *http.Request) 
 
 	http.Redirect(w, r, fmt.Sprintf("/snippets/%d", id), http.StatusSeeOther)
 	return
+}
+
+func (app *application) usersSignupGet(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+
+	app.render(w, "signup.tmpl", data, 200)
+}
+
+func (app *application) usersSignupPost(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		app.clientError(w, 400)
+		return
+	}
+
+	name, email, password := r.PostForm.Get("name"), r.PostForm.Get("email"), r.PostForm.Get("password")
+
+	form := app.users.NewUserSignupForm(name, email, password)
+	data := app.newTemplateData(r)
+
+	if userErrors, ok := app.users.Validate(form); !ok {
+		data.UserSignupForm = form
+		data.Errors = userErrors
+
+		app.render(w, "signup.tmpl", data, 422)
+		return
+	}
+
+	_, err = app.users.Signup(form)
+	if err != nil {
+		if strings.Contains(err.Error(), "duplicate") {
+			data.UserSignupForm = form
+			data.Errors = &map[string]string{"error": "Email already exists"}
+
+			app.render(w, "signup.tmpl", data, 400)
+		}
+	}
+
+	app.sessionManager.Put(r.Context(), "flash", "User created successfully")
+	http.Redirect(w, r, "/users/login", http.StatusSeeOther)
+}
+
+func (app *application) usersLoginGet(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+
+	app.render(w, "login.tmpl", data, 200)
+}
+
+func (app *application) usersLoginPost(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		app.clientError(w, 400)
+		return
+	}
+
+	email := r.PostForm.Get("email")
+	password := r.PostForm.Get("password")
+	form := app.users.NewUserLoginForm(email, password)
+
+	user, err := app.users.Login(form)
+	if err != nil {
+		if strings.Contains(err.Error(), "no rows") || strings.Contains(err.Error(), "incorrect password") {
+			data := app.newTemplateData(r)
+			data.Errors = &map[string]string{"error": "Invalid credentials"}
+
+			app.render(w, "login.tmpl", data, 400)
+		}
+	}
+
+	if err := app.sessionManager.RenewToken(r.Context()); err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.sessionManager.Put(r.Context(), "userId", user.Id)
+
+	http.Redirect(w, r, "/", 303)
+}
+
+func (app *application) usersLogoutGet(w http.ResponseWriter, r *http.Request) {
+	if err := app.sessionManager.RenewToken(r.Context()); err != nil {
+		app.serverError(w, err)
+		return
+	}
+
+	app.sessionManager.Remove(r.Context(), "userId")
+	app.sessionManager.Put(r.Context(), "flash", "Logged out successfully")
+
+	http.Redirect(w, r, "/users/login", 303)
 }

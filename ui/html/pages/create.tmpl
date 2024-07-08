@@ -16,7 +16,7 @@
       required
     />
     <p class="error">
-      {{if .SnippetErrors}}{{.SnippetErrors.titleError}}{{ end }}
+      {{if .Errors}}{{.Errors.titleError}}{{ end }}
     </p>
   </div>
   <div>
@@ -32,7 +32,7 @@
       required
     />
     <p class="error">
-      {{if .SnippetErrors}}{{.SnippetErrors.contentError}}{{ end }}
+      {{if .Errors}}{{.Errors.contentError}}{{ end }}
     </p>
   </div>
   <div>
@@ -47,7 +47,7 @@
       required
     />
     <p class="error">
-      {{if .SnippetErrors}}{{.SnippetErrors.expiresError}}{{ end }}
+      {{if .Errors}}{{.Errors.expiresError}}{{ end }}
     </p>
   </div>
   <input type="submit" value="Create Snippet" />

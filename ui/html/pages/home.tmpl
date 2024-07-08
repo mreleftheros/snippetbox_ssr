@@ -1,6 +1,9 @@
 {{define "title"}}Home{{ end }}
 
 {{define "main"}}
+{{if .Flash}}
+  <p class="success">{{.Flash}}</p>
+{{end}}
 {{if .Snippets}}
 <p>Total: {{ len .Snippets }}</p>
 {{ range.Snippets }}

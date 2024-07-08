@@ -1,0 +1,19 @@
+{{define "title"}}Login{{ end }}
+
+{{define "main"}}
+{{if .Flash}}
+  <p class="success">{{.Flash}}</p>
+{{end}}
+<form action="/users/login" method="POST" autocomplete="off">
+  <div>
+    <label for="email">Email:</label>
+    <input type="email" name="email" id="email" required />
+  </div>
+  <div>
+    <label for="password">Password:</label>
+    <input type="password" name="password" id="password" required />
+  </div>
+  <p class="error">{{if .Errors}}{{.Errors.error}}{{end}}</p>
+  <button>Login</button>
+</form>
+{{ end }}

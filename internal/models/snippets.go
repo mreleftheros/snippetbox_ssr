@@ -77,6 +77,7 @@ func (m *SnippetModel) Insert(f *SnippetForm) (int, error) {
 
 func (m *SnippetModel) Get(id int) (*Snippet, error) {
 	stmt := "SELECT id, title, content, created, expires FROM snippets WHERE expires > now() AND id = $1;"
+
 	var s = &Snippet{}
 	err := m.db.QueryRow(context.Background(), stmt, id).Scan(&s.Id, &s.Title, &s.Content, &s.Created, &s.Expires)
 	if err != nil {
