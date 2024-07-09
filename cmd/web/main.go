@@ -16,7 +16,7 @@ import (
 	"github.com/mreleftheros/snippetbox_ssr/internal/models"
 )
 
-type environment struct {
+type config struct {
 	addr string
 }
 
@@ -30,8 +30,8 @@ type application struct {
 }
 
 func main() {
-	var env environment
-	flag.StringVar(&env.addr, "addr", "localhost:3000", "http address")
+	var cfg config
+	flag.StringVar(&cfg.addr, "addr", "localhost:3000", "http address")
 	flag.Parse()
 
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
@@ -71,8 +71,8 @@ func main() {
 		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
 	}
 
-	srv := http.Server{
-		Addr:         env.addr,
+	srv := &http.Server{
+		Addr:         cfg.addr,
 		Handler:      app.routes(),
 		ErrorLog:     errLog,
 		TLSConfig:    tlsConfig,
@@ -81,7 +81,7 @@ func main() {
 		WriteTimeout: 10 * time.Second,
 	}
 
-	infoLog.Printf("Starting server on %s", env.addr)
+	infoLog.Printf("Starting server on %s", cfg.addr)
 	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	errLog.Fatal(err)
 }
